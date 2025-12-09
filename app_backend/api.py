@@ -1,52 +1,49 @@
-# app_backend/api.py
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
 from .model_util import load_model, predict_instance
 
-app = FastAPI(title="Iris Predictor API")
+app = FastAPI(title="Pinguim Predictor API")
 
-# Allow Streamlit (rodando em outra porta) to call API
+# Permissões do Streamlit (rodando em outra porta) para chamar API
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Em produção restrinja os domínios
+    allow_origins=["*"],  # Não Restrinje os domínios
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Input schema
-class IrisInput(BaseModel):
-    sepal_length: float = Field(..., gt=0)
-    sepal_width: float = Field(..., gt=0)
-    petal_length: float = Field(..., gt=0)
-    petal_width: float = Field(..., gt=0)
+class PenguimInput(BaseModel):
+    culmen_length_mm: float = Field(..., gt=0)
+    culmen_depth_mm: float = Field(..., gt=0)
+    flipper_length_mm: float = Field(..., gt=0)
+    body_mass_g: float = Field(..., gt=0)
 
 # Output schema
 class PredictionResponse(BaseModel):
     predicted_class: str
     confidence: float  # 0..1
-    probabilities: List[float]  # probabilities for [setosa, versicolor, virginica]
+    probabilities: List[float]  
 
 
 # Load model on startup
-MODEL_PATH = "app_backend/model/iris_model.pkl"
+MODEL_PATH = "model/penguim_classifier_tree_model.pkl"
 model = load_model(MODEL_PATH)
-
 
 @app.get("/")
 def read_root():
-    return {"message": "Iris Predictor API. POST to /predict with sepal/petal measurements."}
+    return {"message": "Pinguim Predictor API — use POST /predict"}
 
 
 @app.post("/predict", response_model=PredictionResponse)
-def predict(data: IrisInput):
+def predict(data: PenguimInput):
     x = [
-        data.sepal_length,
-        data.sepal_width,
-        data.petal_length,
-        data.petal_width,
+        data.culmen_length_mm,
+        data.culmen_depth_mm,
+        data.flipper_length_mm,
+        data.body_mass_g,
     ]
     pred_class, confidence, probs = predict_instance(model, x)
     return PredictionResponse(
