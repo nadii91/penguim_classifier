@@ -1,5 +1,3 @@
-# Import das bibliotecas
-
 import pandas as pd # Biblioteca pandas para análise e manipulação de dados
 import matplotlib.pyplot as plt # Biblioteca matplotlib para customizar gráficos
 import seaborn as sns # Biblioteca Seaborn para esboçar gráficos
